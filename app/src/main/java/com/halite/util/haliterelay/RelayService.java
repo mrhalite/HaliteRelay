@@ -163,11 +163,13 @@ public class RelayService extends Service {
             String smsDate = intent.getStringExtra(DATA_SMS_DATE);
             String smsAddr = intent.getStringExtra(DATA_SMS_ADDR);
             String smsBody = intent.getStringExtra(DATA_SMS_BODY);
+            String contactStr = _getContact(smsAddr);
 
             String smsStr = "문자 받음\n";
             smsStr += "수신 시간 : " + smsDate + "\n";
             smsStr += "수신 번호 : " + smsAddr + "\n";
-            smsStr += _getContact(smsAddr) + "\n";
+            if (contactStr.length() > 0)
+                smsStr += _getContact(smsAddr) + "\n";
             smsStr += "문자 내용 : " + smsBody;
 
             _sendSMS(_config.phoneNumber, smsStr);
@@ -232,7 +234,7 @@ public class RelayService extends Service {
 
                 String contactName = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
 
-                contactStr = "수신 이름 : " + contactName + "\n";
+                contactStr = "수신 이름 : " + contactName;
             }
         } finally {
             if (contactLookup != null) {
