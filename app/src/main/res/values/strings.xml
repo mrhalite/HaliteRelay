@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">HaliteRelay</string>
+    <string name="restart_service">Restart Service</string>
+    <string name="phone_number_to_deliver">Phone number to deliver</string>
+    <string name="should_be_set">반드시 있어야 함</string>
+    <string name="phone_call">Phone Call</string>
+    <string name="sms">SMS</string>
+    <string name="email">E-Mail</string>
+    <string name="kakaotalk">KakaoTalk</string>
+    <string name="save_settings">Save Settings</string>
+</resources>
