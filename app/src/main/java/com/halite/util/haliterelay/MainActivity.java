@@ -61,6 +61,11 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);
     }
 
+    public void stopServiceBtn_Click(View v) {
+        Intent intent = new Intent(getBaseContext(), RelayService.class);
+        stopService(intent);
+    }
+
     private void _loadSettings() {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this); //getPreferences(MODE_PRIVATE);
 
@@ -81,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void saveSettingsBtn_Click(View v) {
         _saveSettings();
-
     }
 
     private void _saveSettings() {
@@ -103,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         edit.putBoolean(Config.KAKAOTALK, cb.isChecked());
 
         edit.apply();
+        Toast.makeText(this, "Settings Saved.", Toast.LENGTH_SHORT).show();
 
         _loadSettingsInService();
     }

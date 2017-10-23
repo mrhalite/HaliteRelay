@@ -230,9 +230,32 @@ public class RelayService extends Service {
             if (contactLookup != null && contactLookup.getCount() > 0) {
                 contactLookup.moveToNext();
 
+                String contactId = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data._ID));
                 String contactName = contactLookup.getString(contactLookup.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
 
-                contactStr = "수신 이름 : " + contactName + "\n";
+                contactStr = "수신 이름 : " + contactName;
+
+                Cursor cc = contentResolver.query(
+                        ContactsContract.Data.CONTENT_URI,
+                        null,
+                        ContactsContract.Data.CONTACT_ID + "=? AND " + ContactsContract.Data.MIMETYPE + "=?",
+                        new String[]{contactId, ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE},
+                        null
+                );
+                try {
+                    cc.moveToNext();
+
+                    String contactCompany = cc.getString(cc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
+                    String contactTitle = cc.getString(cc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
+
+                    contactStr += "\n";
+                    contactStr += "수신 회사 : " + contactCompany + "\n";
+                    contactStr += "수신 직책 : " + contactTitle;
+                } finally {
+                    if (cc != null) {
+                        cc.close();
+                    }
+                }
             }
         } finally {
             if (contactLookup != null) {
