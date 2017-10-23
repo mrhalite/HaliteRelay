@@ -1,7 +1,5 @@
 # HaliteRelay v1.2
 
------
-
 ## Change Log
 v1.1
     - Release
