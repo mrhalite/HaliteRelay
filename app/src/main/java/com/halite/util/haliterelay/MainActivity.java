@@ -4,9 +4,12 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -36,6 +39,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         _loadSettings();
+
+        try {
+            PackageInfo pi = this.getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pi.versionName;
+            EditText et = (EditText)findViewById(R.id.versionEditText);
+            et.setText("Application Version : " + version);
+        }
+        catch (PackageManager.NameNotFoundException e) {
+            Log.d(this.getClass().getSimpleName(), e.getMessage());
+        }
     }
 
     // check the service is already running or not

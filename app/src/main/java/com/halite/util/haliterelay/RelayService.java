@@ -14,11 +14,15 @@ import android.provider.BaseColumns;
 import android.provider.ContactsContract;
 import android.support.v4.app.NotificationManagerCompat;
 import android.telephony.SmsManager;
+import android.text.Html;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Set;
+
+import static java.net.URLEncoder.*;
 
 public class RelayService extends Service {
     public static final String CMD_LOAD_SETTINGS = "CMD_LOAD_SETTINGS";
@@ -37,8 +41,13 @@ public class RelayService extends Service {
     public static final String DATA_NOTIFICATION_TITLE = "DATA_NOTIFICATION_TITLE";
     public static final String DATA_NOTIFICATION_TEXT = "DATA_NOTIFICATION_TEXT";
     public static final String DATA_NOTIFICATION_SUBTEXT = "DATA_NOTIFICATION_SUBTEXT";
+    public static final String CMD_MMS_RECEIVED = "CMD_MMS_RECEIVED";
+    public static final String DATA_MMS_DATE = "DATA_MMS_DATE";
+    public static final String DATA_MMS_ADDR = "DATA_MMS_ADDR";
+    public static final String DATA_MMS_BODY = "DATA_MMS_BODY";
 
     private BroadcastReceiver _smsReceiver = null;
+    private BroadcastReceiver _mmsReceiver = null;
     private BroadcastReceiver _phoneCallReceiver = null;
 
     private Config _config;
@@ -88,6 +97,11 @@ public class RelayService extends Service {
             Log.d(this.getClass().getSimpleName(), "Notification Received");
             _notificationReceived(intent);
         }
+        else if (intent.getStringExtra(CMD_MMS_RECEIVED) != null) {
+            // notification received
+            Log.d(this.getClass().getSimpleName(), "MMS Received");
+            _mmsReceived(intent);
+        }
         else {
             Toast.makeText(this, "Service Started", Toast.LENGTH_SHORT).show();
             _config = _loadSettings();
@@ -134,6 +148,13 @@ public class RelayService extends Service {
         IntentFilter srif = new IntentFilter(SMSReceiver.SMS_RECEIVED);
         registerReceiver(_smsReceiver, srif);
 
+        // mms receiver 등록
+        _mmsReceiver = new MMSReceiver();
+        IntentFilter mrif_1 = new IntentFilter(MMSReceiver.MMS_RECEIVED_1);
+        IntentFilter mrif_2 = IntentFilter.create(MMSReceiver.MMS_RECEIVED_2, MMSReceiver.MMS_DATA_TYPE);
+        registerReceiver(_mmsReceiver, mrif_1);
+        registerReceiver(_mmsReceiver, mrif_2);
+
         // phone call receiver 등록
         _phoneCallReceiver = new PhoneCallReceiver();
         IntentFilter pcif = new IntentFilter(PhoneCallReceiver.PHONECALL_RECEIVED);
@@ -146,6 +167,11 @@ public class RelayService extends Service {
         if (_smsReceiver != null) {
             unregisterReceiver(_smsReceiver);
             _smsReceiver = null;
+        }
+
+        if (_mmsReceiver != null) {
+            unregisterReceiver(_mmsReceiver);
+            _mmsReceiver = null;
         }
 
         if (_phoneCallReceiver != null) {
@@ -169,6 +195,22 @@ public class RelayService extends Service {
             smsStr += "수신 번호 : " + smsAddr + "\n";
             smsStr += _getContact(smsAddr) + "\n";
             smsStr += "문자 내용 : " + smsBody;
+
+            _sendSMS(_config.phoneNumber, smsStr);
+        }
+    }
+
+    private void _mmsReceived(Intent intent) {
+        if (_config.sms) {
+            String mmsDate = intent.getStringExtra(DATA_MMS_DATE);
+            String mmsAddr = intent.getStringExtra(DATA_MMS_ADDR);
+            String mmsBody = intent.getStringExtra(DATA_MMS_BODY);
+
+            String smsStr = "MMS 받음\n";
+            smsStr += "수신 시간 : " + mmsDate + "\n";
+            smsStr += "수신 번호 : " + mmsAddr + "\n";
+            smsStr += _getContact(mmsAddr) + "\n";
+            smsStr += "문자 내용 : " + mmsBody;
 
             _sendSMS(_config.phoneNumber, smsStr);
         }
@@ -267,74 +309,26 @@ public class RelayService extends Service {
         return contactStr;
     }
 
-/*
-    private String _getContact(String incomingNumber) { // 참고 사이트 --> http://lhh3520.tistory.com/296
-
-        String contactStr = "";
-
-        String[] projection = {
-                ContactsContract.Contacts._ID,
-                ContactsContract.Contacts.DISPLAY_NAME
-        };
-        // 연락처에서 전화 번호로 검색
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(incomingNumber));
-//        Cursor c = getContentResolver().query(
-//                ContactsContract.Contacts.CONTENT_URI,
-//                projection,
-//                ContactsContract.Contacts.HAS_PHONE_NUMBER + "=1",
-//                null, null);
-        Cursor c = getContentResolver().query(
-                uri,
-                projection,
-                null,
-                null, null);
-        while (c.moveToNext()) {
-            String contactID = c.getString(0);
-            String contactName = c.getString(1);
-
-            contactStr = "이름 : " + contactName;
-
-            // 검색된 연락처에서 회사, 직책 정보를 검색
-            String orgSelection = ContactsContract.Data.CONTACT_ID + "=? AND " + ContactsContract.Data.MIMETYPE + "=?";
-            String[] orgSelectionArgs = new String[] {
-                    contactID,
-                    ContactsContract.CommonDataKinds.Organization.CONTENT_ITEM_TYPE
-            };
-            Cursor cc = getContentResolver().query(
-                    ContactsContract.Data.CONTENT_URI,
-                    null,
-                    orgSelection,
-                    orgSelectionArgs,
-                    null
-            );
-            while (cc.moveToNext()) {
-                String contactCompany = cc.getString(cc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.DATA));
-                String contactTitle = cc.getString(cc.getColumnIndex(ContactsContract.CommonDataKinds.Organization.TITLE));
-
-//                contactStr = */
-/*"전화번호 : " + incomingNumber + "\r\n" +*//*
-
-//                        "이름 : " + contactName + "\n" +
-//                        "회사 : " + contactCompany + "\n" +
-//                        "직책 : " + contactTitle;
-                contactStr = "\n" +
-                        "회사 : " + contactCompany + "\n" +
-                        "직책 : " + contactTitle;
-            }
-            cc.close();
-        }
-        c.close();
-
-        return contactStr;
-    }
-*/
-
     //----------------------------------------------------------------------------------------------
     // Forward SMS
     //----------------------------------------------------------------------------------------------
     private void _forwardSms(Intent intent) {
-        String smsAddr = intent.getStringExtra(DATA_FORWARD_SMS_ADDR);
-        String smsBody = intent.getStringExtra(DATA_FORWARD_SMS_BODY);
+        String smsAddr = "";
+        try {
+            smsAddr = intent.getStringExtra(DATA_FORWARD_SMS_ADDR);
+        }
+        catch (Exception e){
+            Log.d(this.getClass().getSimpleName(), e.getMessage());
+        }
+
+        String smsBody = "";
+        try {
+            smsBody = intent.getStringExtra(DATA_FORWARD_SMS_BODY);
+        }
+        catch (Exception e) {
+            Log.d(this.getClass().getSimpleName(), e.getMessage());
+        }
+
         _sendSMS(smsAddr, smsBody);
     }
 
@@ -357,7 +351,7 @@ public class RelayService extends Service {
 
             smsBody += "받은 시간 : " + dateStr + "\n";
             smsBody += "제목 : " + titleStr + "\n";
-            smsBody += "내용 : " + textStr + "\n";
+            smsBody += "내용 : " + textStr;
             //smsBody += "SubText : " + subTextStr;
 
             _sendSMS(_config.phoneNumber, smsBody);

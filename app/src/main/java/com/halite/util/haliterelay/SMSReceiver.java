@@ -3,6 +3,8 @@ package com.halite.util.haliterelay;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SearchRecentSuggestionsProvider;
+import android.net.Uri;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
 import android.util.Log;
@@ -62,13 +64,18 @@ public class SMSReceiver extends BroadcastReceiver {
                 if (cmdStr.equals("cmdcmd")) {
                     // command 받았음 전달 할 것
                     Log.d(this.getClass().getSimpleName(), "Forward SMS");
-                    String[] cmds = smsStr.split("_");
+                    try {
+                        String[] cmds = smsStr.split("_");
 
-                    Intent smsIntent = new Intent(context, RelayService.class);
-                    smsIntent.putExtra(RelayService.CMD_FORWARD_SMS, "");
-                    smsIntent.putExtra(RelayService.DATA_FORWARD_SMS_ADDR, cmds[1]);
-                    smsIntent.putExtra(RelayService.DATA_FORWARD_SMS_BODY, cmds[2]);
-                    context.startService(smsIntent);
+                        Intent smsIntent = new Intent(context, RelayService.class);
+                        smsIntent.putExtra(RelayService.CMD_FORWARD_SMS, "");
+                        smsIntent.putExtra(RelayService.DATA_FORWARD_SMS_ADDR, cmds[1]);
+                        smsIntent.putExtra(RelayService.DATA_FORWARD_SMS_BODY, cmds[2]);
+                        context.startService(smsIntent);
+                    }
+                    catch (Exception e) {
+                        Log.d(this.getClass().getSimpleName(), e.getMessage());
+                    }
                 }
                 else {
                     // 단순 메시지 받음
