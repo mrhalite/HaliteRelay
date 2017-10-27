@@ -3,9 +3,11 @@
 ## Change Log
 v1.1
     - Release
+
 v1.2
     - 연락처에서 회사와 직책을 찾아 보여주도록 수정
     - Layout 오류 수정
+
 v1.3
     - MMS 받기 기능 추가
 
