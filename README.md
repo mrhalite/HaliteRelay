@@ -1,4 +1,4 @@
-# HaliteRelay v1.3
+# HaliteRelay v1.4
 
 ## Change Log
 v1.1
