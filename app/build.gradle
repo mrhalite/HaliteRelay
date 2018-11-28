@@ -1,14 +1,19 @@
 apply plugin: 'com.android.application'
 
+repositories {
+    google()
+    jcenter()
+}
+
 android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "com.halite.util.haliterelay"
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 26
-        versionCode 14
-        versionName "1.4"
+        versionCode 17
+        versionName "1.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -17,14 +22,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
 
             applicationVariants.all { variant->
-                variant.outputs.all {
+                variant.outputs.each {
                     output->
 //                        def date = new Date();
 //                        def formattedDate = date.format('yyyyMMddHHmmss')
-                        def file = output.outputFile
+//                        def file = output.outputFile
 //                        output.outputFile = new File(file.parent,
 //                                file.name.replace("app", "HaliteRelay."+defaultConfig.versionName/*+"-"+formattedDate*/))
-                        outputFileName = file.name.replace("app", "HaliteRelay."+defaultConfig.versionName/*+"-"+formattedDate*/)
+                        output.outputFile.name.replace("app", "HaliteRelay."+defaultConfig.versionName/*+"-"+formattedDate*/)
                 }
             }
         }

@@ -67,6 +67,9 @@ public class NotificationListener extends NotificationListenerService {
             CharSequence text = extras.getCharSequence(Notification.EXTRA_TEXT);
             CharSequence subText = extras.getCharSequence(Notification.EXTRA_SUB_TEXT);
 
+            if (text == null)
+                return;
+
             Date dt = new Date(sbn.getPostTime());
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String dateStr = sdf.format(dt);
