@@ -27,6 +27,7 @@ public class NotificationListener extends NotificationListenerService {
         // 권한이 없으면 권한 설정을 띄운다.
         if (!isPermissionAllowed()) {
             Intent intent = new Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }
     }
